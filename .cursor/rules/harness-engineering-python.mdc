@@ -1,0 +1,64 @@
+# Harness Engineering Rules for Python
+
+These rules guide reliable, testable, maintainable Python harnesses, including test automation, CI utilities, API clients, and hardware or simulation interfaces.
+
+## Rules
+
+1. **Keep the harness deterministic**
+   - Control randomness with explicit seeds.
+   - Inject clocks, network clients, filesystem paths, and hardware adapters.
+   - Avoid hidden global state and test-order dependencies.
+
+2. **Make configuration explicit**
+   - Use typed configuration objects and CLI or environment-variable overrides.
+   - Never hard-code credentials, hostnames, ports, timeouts, or destructive options.
+   - Validate configuration at startup and fail with actionable messages.
+
+3. **Use clear boundaries**
+   - Keep orchestration separate from domain logic and adapters.
+   - Define protocols/interfaces for external systems so they can be replaced by fakes.
+   - Keep functions small and give each one a single responsibility.
+
+4. **Handle failures safely**
+   - Set timeouts on network, subprocess, and hardware operations.
+   - Catch only exceptions that can be handled; preserve the original cause with `raise ... from exc`.
+   - Make cleanup idempotent and use context managers where possible.
+   - Default to a safe, non-destructive mode.
+
+5. **Log for diagnosis**
+   - Use `logging`, not ad-hoc `print()` calls.
+   - Include run ID, test case, target, duration, and relevant configuration metadata.
+   - Never log secrets, tokens, or sensitive payloads.
+
+6. **Test the harness itself**
+   - Unit-test orchestration and failure paths with mocks or fakes.
+   - Add integration tests for real adapters separately.
+   - Test timeouts, retries, cleanup, malformed input, and partial failures.
+
+7. **Make runs reproducible**
+   - Record Python and dependency versions, configuration (with secrets removed), source revision, and timestamps.
+   - Store machine-readable results such as JUnit XML or JSON.
+
+8. **Maintain Python quality**
+   - Target a supported Python version and use type hints.
+   - Format with Ruff/Black, lint with Ruff, and run tests with pytest.
+   - Prefer `pathlib`, `subprocess.run(..., check=True, timeout=...)`, and structured data models.
+
+9. **Document operations**
+   - Provide setup, usage, required permissions, expected outputs, troubleshooting, and rollback instructions.
+   - Document every destructive operation and its safety interlock.
+
+10. **Protect CI and production systems**
+    - Keep credentials in the CI secret store or environment, never in source control.
+    - Use least-privilege credentials and explicit approval for destructive tests.
+    - Make exit codes accurately represent success, failure, and skipped tests.
+
+## Required review checklist
+
+- [ ] Configuration is validated and secrets are excluded from logs.
+- [ ] External calls have timeouts and bounded retries.
+- [ ] Resources are cleaned up on success and failure.
+- [ ] Unit and integration tests cover failure paths.
+- [ ] Results and environment metadata are recorded.
+- [ ] CI formatting, linting, typing, and tests pass.
+- [ ] Destructive operations require explicit safeguards.
